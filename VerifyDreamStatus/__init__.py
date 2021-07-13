@@ -8,12 +8,8 @@
 
 import logging
 from .. import LaunchContainer
-from typing import Dict
 
-def main(imagine:  Dict[str,str]) -> str:
-    
-    return LaunchContainer.launchVqganClipWithPhrase(phrase=imagine["phrase"],
-    initImage=imagine.get("initImage",None),
-    model=imagine.get("model",None),
-    iterations=imagine.get("iterations",None),
-    size=imagine.get("size",None))
+
+def main(name: str) -> str:
+
+    return LaunchContainer.getProvisioningState(name)

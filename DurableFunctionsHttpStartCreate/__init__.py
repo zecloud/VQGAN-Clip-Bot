@@ -6,14 +6,16 @@
 # - run pip install -r requirements.txt
  
 import logging
-
+import json
 import azure.functions as func
 import azure.durable_functions as df
 
 
 async def main(req: func.HttpRequest, starter: str) -> func.HttpResponse:
     client = df.DurableOrchestrationClient(starter)
-    instance_id = await client.start_new(req.route_params["functionName"], None, None)
+    payload = json.loads(req.get_body().decode())
+    instance_id = await client.start_new(req.route_params["functionName"], None, client_input=payload)
+
 
     logging.info(f"Started orchestration with ID = '{instance_id}'.")
 
