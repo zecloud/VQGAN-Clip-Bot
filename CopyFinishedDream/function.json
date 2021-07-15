@@ -1,0 +1,17 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "imagine",
+      "type": "activityTrigger",
+      "direction": "in"
+    },
+    {
+      "type": "queue",
+      "direction": "out",
+      "name": "msgout",
+      "queueName": "vqganfinish-queue",
+      "connection": "origin_STORAGE"
+    }
+  ]
+}

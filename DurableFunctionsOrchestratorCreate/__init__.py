@@ -23,11 +23,11 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     while context.current_utc_datetime < expiry_time:
         job_status = yield context.call_activity("VerifyDreamStatus",containerGroupName)
         logging.info(str(job_status))
-        if str(job_status).lower()  != "succeeded":
+        if str(job_status).lower()  == "succeeded":
             logging.info("Job Complete " + str(job_status))
-
+            yield context.call_activity('CopyFinishedDream', orchRequest)
             break
-        elif str(job_status).lower() != "failed":
+        elif str(job_status).lower() == "failed":
             logging.info("Job Failed " + str(job_status))
             raise Exception("Job failed.")
             #break
@@ -35,7 +35,7 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
             next_check = context.current_utc_datetime + timedelta(minutes=1)
             context.set_custom_status("pendingContainer")
             yield context.create_timer(next_check)
-            logging.info("Job Complete " + str(job_status))
+            logging.info("Job " + str(job_status))
     
     return job_status 
 

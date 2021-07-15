@@ -12,6 +12,14 @@
       "type": "durableClient",
       "direction": "in",
       "name": "client"
+    },
+    {
+      "type": "blob",
+      "direction": "in",
+      "name": "inputImage",
+      "path": "{origincontainer}/{initImage}",
+      "connection": "origin_STORAGE",
+      "dataType": "binary"
     }
   ]
 }
