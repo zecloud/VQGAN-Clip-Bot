@@ -26,6 +26,8 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
         if str(job_status).lower()  == "succeeded":
             logging.info("Job Complete " + str(job_status))
             yield context.call_activity('CopyFinishedDream', orchRequest)
+            finallog=yield context.call_activity("Clean",containerGroupName)
+            logging.info(finallog)
             break
         elif str(job_status).lower() == "failed":
             logging.info("Job Failed " + str(job_status))

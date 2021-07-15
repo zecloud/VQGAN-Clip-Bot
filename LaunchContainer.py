@@ -136,6 +136,14 @@ def getProvisioningState(container_group_name=None):
     container_group = aciclient.container_groups.get(resource_group_name,
                                                       container_group_name)
     return container_group.provisioning_state
+
+def removeContainerGroupFinished(container_group_name):
+    credential = DefaultAzureCredential()
+    resource_group_name = environ["resgroup"]
+    aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
+    aciclient.container_groups.delete(resource_group_name,container_group_name)
+
+    
     # if str(container_group.provisioning_state).lower() == 'succeeded':
     #     return("\nCreation of container group '{}' succeeded."
     #           .format(container_group_name))
