@@ -141,7 +141,7 @@ def removeContainerGroupFinished(container_group_name):
     credential = DefaultAzureCredential()
     resource_group_name = environ["resgroup"]
     aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
-    aciclient.container_groups.delete(resource_group_name,container_group_name)
+    aciclient.container_groups.begin_delete(resource_group_name,container_group_name)
 
     
     # if str(container_group.provisioning_state).lower() == 'succeeded':
