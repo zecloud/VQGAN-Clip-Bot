@@ -137,11 +137,28 @@ def getProvisioningState(container_group_name=None):
                                                       container_group_name)
     return container_group.provisioning_state
 
+def getContainerState(container_group_name=None):
+    credential = DefaultAzureCredential()
+    resource_group_name = environ["resgroup"]
+    aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
+    container_group = aciclient.container_groups.get(resource_group_name,
+                                                      container_group_name)
+    return container_group.instance_view.state
+
+
 def removeContainerGroupFinished(container_group_name):
     credential = DefaultAzureCredential()
     resource_group_name = environ["resgroup"]
     aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
-    aciclient.container_groups.begin_delete(resource_group_name,container_group_name)
+    # Get the logs for the container
+    logs = aciclient.containers.list_logs(resource_group_name,
+                                          container_group_name,
+                                          container_group_name)
+    finallog= logs.content
+    # print("Logs for container '{0}':".format(container_group_name))
+    # print("{0}".format(logs.content))
+    #aciclient.container_groups.begin_delete(resource_group_name,container_group_name)
+    return finallog
 
     
     # if str(container_group.provisioning_state).lower() == 'succeeded':

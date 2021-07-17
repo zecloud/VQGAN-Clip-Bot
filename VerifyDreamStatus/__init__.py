@@ -11,5 +11,6 @@ from .. import LaunchContainer
 
 
 def main(name: str) -> str:
-
-    return LaunchContainer.getProvisioningState(name)
+    provisioningState=LaunchContainer.getProvisioningState(name)
+    containerState=LaunchContainer.getContainerState(name)
+    return (provisioningState,containerState)

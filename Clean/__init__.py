@@ -11,6 +11,6 @@ from .. import LaunchContainer
 
 def main(name: str) -> str:
 
-    LaunchContainer.removeContainerGroupFinished(name)
-
+    logs=LaunchContainer.removeContainerGroupFinished(name)
+    logging.info(logs)
     return f"Clean Complete {name} deleted !"

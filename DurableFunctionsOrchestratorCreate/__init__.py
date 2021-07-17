@@ -21,17 +21,33 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
 
     expiry_time = context.current_utc_datetime + timedelta(minutes=120)
     while context.current_utc_datetime < expiry_time:
-        job_status = yield context.call_activity("VerifyDreamStatus",containerGroupName)
+        status = yield context.call_activity("VerifyDreamStatus",containerGroupName)
+        job_status=status[0]
         logging.info(str(job_status))
         if str(job_status).lower()  == "succeeded":
-            logging.info("Job Complete " + str(job_status))
-            yield context.call_activity('CopyFinishedDream', orchRequest)
-            finallog=yield context.call_activity("Clean",containerGroupName)
-            logging.info(finallog)
-            break
+            logging.info("Job " + str(job_status))
+            context.set_custom_status("ContainerStarted")
+            container_status = status[1]
+            if(str(container_status).lower()=="succeeded"):
+                yield context.call_activity('CopyFinishedDream', orchRequest)
+                finallog=yield context.call_activity("Clean",containerGroupName)
+                logging.info(finallog)
+                break
+            elif(str(container_status).lower()=="failed"):
+                logging.info("Container "+str(container_status))
+                #finallog=yield context.call_activity("Clean",containerGroupName)
+                #logging.info(finallog)
+                raise Exception("Job failed.")
+            elif(str(container_status).lower()=="Stopped"):
+                logging.info("Container "+str(container_status))
+                logging.info("Exiting")
+                break
+            else:
+                logging.info("Container "+str(container_status))
+
         elif str(job_status).lower() == "failed":
             logging.info("Job Failed " + str(job_status))
-            raise Exception("Job failed.")
+            raise Exception("Provisioning failed.")
             #break
         else:
             next_check = context.current_utc_datetime + timedelta(minutes=1)
