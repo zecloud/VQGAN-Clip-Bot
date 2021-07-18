@@ -57,7 +57,7 @@ def run_task_based_container(aci_client, resource_group, container_group_name,
     print("Creating container group '{0}' with start command '{1}'"
           .format(container_group_name, start_command_line))
 
-    gpu_res= GpuResource(count=1,sku="K80")
+    gpu_res= GpuResource(count=1,sku=environ["SKUGPU"])
     # Configure the container
     container_resource_requests = ResourceRequests(memory_in_gb=16, cpu=1.0,gpu=gpu_res)
     container_resource_requirements = ResourceRequirements(
