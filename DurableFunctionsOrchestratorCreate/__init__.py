@@ -25,36 +25,31 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
         job_status=status[0]
         logging.info(str(job_status))
         if str(job_status).lower()  == "succeeded":
-            logging.info("Job " + str(job_status))
             context.set_custom_status("ContainerStarted")
             container_status = status[1]
             if(str(container_status).lower()=="succeeded"):
+                context.set_custom_status("succeeded")
                 yield context.call_activity('CopyFinishedDream', orchRequest)
                 finallog=yield context.call_activity("Clean",containerGroupName)
                 logging.info(finallog)
                 break
             elif(str(container_status).lower()=="failed"):
-                logging.info("Container "+str(container_status))
-                #finallog=yield context.call_activity("Clean",containerGroupName)
-                #logging.info(finallog)
-                raise Exception("Job failed.")
-            elif(str(container_status).lower()=="Stopped"):
-                logging.info("Container "+str(container_status))
+               logging.info("Container "+str(container_status))
+               #finallog=yield context.call_activity("Clean",containerGroupName)
+               #logging.info(finallog)
+               raise Exception("Job failed.")
+            logging.info("Container "+str(container_status))
+        elif(str(job_status).lower()=="stopped"):
+                logging.info("Job "+str(job_status))
                 logging.info("Exiting")
                 break
-            else:
-                logging.info("Container "+str(container_status))
-
         elif str(job_status).lower() == "failed":
             logging.info("Job Failed " + str(job_status))
             raise Exception("Provisioning failed.")
-            #break
-        else:
-            next_check = context.current_utc_datetime + timedelta(minutes=1)
-            context.set_custom_status("pendingContainer")
-            yield context.create_timer(next_check)
-            logging.info("Job " + str(job_status))
-    
+        next_check = context.current_utc_datetime + timedelta(minutes=1)
+        context.set_custom_status("pendingContainer")
+        yield context.create_timer(next_check)
+       
     return job_status 
 
    
