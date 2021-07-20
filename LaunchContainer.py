@@ -157,7 +157,7 @@ def removeContainerGroupFinished(container_group_name):
     finallog= logs.content
     # print("Logs for container '{0}':".format(container_group_name))
     # print("{0}".format(logs.content))
-    #aciclient.container_groups.begin_delete(resource_group_name,container_group_name)
+    aciclient.container_groups.begin_delete(resource_group_name,container_group_name)
     return finallog
 
     
