@@ -38,11 +38,12 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
                #finallog=yield context.call_activity("Clean",containerGroupName)
                #logging.info(finallog)
                raise Exception("Job failed.")
-            logging.info("Container "+str(container_status))
-        elif(str(job_status).lower()=="stopped"):
+            elif(str(container_status).lower()=="stopped"):
                 logging.info("Job "+str(job_status))
                 logging.info("Exiting")
                 break
+            logging.info("Container "+str(container_status))
+            
         elif str(job_status).lower() == "failed":
             logging.info("Job Failed " + str(job_status))
             raise Exception("Provisioning failed.")
