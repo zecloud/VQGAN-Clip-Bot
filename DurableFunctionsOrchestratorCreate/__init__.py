@@ -18,7 +18,7 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     orchRequest:Dict[str,str]  =context.get_input()
     
     containerGroupName =yield context.call_activity('Generate_images', orchRequest)
-
+    trycount=0
     expiry_time = context.current_utc_datetime + timedelta(minutes=120)
     while context.current_utc_datetime < expiry_time:
         status = yield context.call_activity("VerifyDreamStatus",containerGroupName)
@@ -34,10 +34,14 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
                 logging.info(finallog)
                 break
             elif(str(container_status).lower()=="failed"):
-               logging.info("Container "+str(container_status))
-               #finallog=yield context.call_activity("Clean",containerGroupName)
-               #logging.info(finallog)
-               raise Exception("Job failed.")
+                logging.info("Container "+str(container_status))
+                #finallog=yield context.call_activity("Clean",containerGroupName)
+                #logging.info(finallog)
+                if(trycount==1):
+                   raise Exception("Job failed.")
+                else:
+                   containerGroupName =yield context.call_activity('Generate_images', orchRequest)
+                   trycount=trycount+1
             elif(str(container_status).lower()=="stopped"):
                 logging.info("Job "+str(job_status))
                 logging.info("Exiting")
