@@ -1,0 +1,18 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "imagine",
+      "type": "activityTrigger",
+      "direction": "in"
+    },
+    {
+      "type": "blob",
+      "direction": "out",
+      "name": "exportImage",
+      "path": "demo/{initImage}",
+      "connection": "origin_STORAGE",
+      "dataType": "binary"
+    }
+  ]
+}

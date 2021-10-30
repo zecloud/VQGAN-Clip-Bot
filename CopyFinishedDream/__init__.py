@@ -10,15 +10,12 @@ import logging
 import os.path
 import azure.functions as func
 import json 
+from .. import experiment
 
-def to_experiment_name(prompts):
-    return " ".join(str.split(prompts)).strip().replace(".", " ")\
-              .replace("-", " ").replace(",", " ")\
-              .replace(" ", "_")
 
 def main(imagine:  Dict[str,str],msgout:func.Out[func.QueueMessage]) -> str:
     id,ext = os.path.splitext(imagine["initImage"])
-    dream=to_experiment_name(imagine["phrase"])
+    dream=experiment.to_experiment_name(imagine["phrase"])
 
     dreamcomplete={'id':id,'dream':dream,'origincontainer':imagine["origincontainer"]}
     msgout.set(json.dumps(dreamcomplete))

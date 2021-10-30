@@ -11,7 +11,7 @@ async def main(req: func.HttpRequest, starter: str) -> func.HttpResponse:
 
     if existing_instance.runtime_status in [df.OrchestrationRuntimeStatus.Completed, df.OrchestrationRuntimeStatus.Failed, df.OrchestrationRuntimeStatus.Terminated, None]:
         payload =req.get_json()
-        path=payload["initImage"]#"/outputs/"+
+        path="/outputs/"+payload["initImage"]#
         url_imgsrc=payload["url_imgsrc"]
         response = requests.get(url_imgsrc)
         with open(path,'wb+') as f:

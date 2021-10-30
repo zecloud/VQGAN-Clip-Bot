@@ -112,12 +112,11 @@ def launchVqganClipWithPhraseOnExistingInstance(phrase,initImage=None,model=None
         run_command = run_command +" --iterations " + str(iterations)
     if(size):
         run_command = run_command +" --size " + str(size[0])+ " " +str(size[1])
-    resource_group_name ="gangogh" #environ["resgroup"]
+    resource_group_name =environ["resgroup"]
     container_group_name = "vqganclip-demo"
     container_name="vqganclip-demo"
     credential = DefaultAzureCredential()
     aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
-    #run_command=
     exec_command=ContainerExecRequest(command="/bin/bash",terminal_size=ContainerExecRequestTerminalSize(rows=400,cols=400))
     
     exec_result=aciclient.containers.execute_command(resource_group_name,container_group_name,container_name,exec_command)
@@ -127,17 +126,10 @@ def launchVqganClipWithPhraseOnExistingInstance(phrase,initImage=None,model=None
         ws.send(exec_result.password)
         ws.send(run_command+"\n")
         term_result=ws.recv()
-        # term_result=term_result+ws.recv()
-        # term_result=term_result+ws.recv()
-        # term_result=term_result+ws.recv()
-        # term_result=term_result+ws.recv()
-        # term_result=term_result+ws.recv()
-        # term_result=term_result+ws.recv()
-        # term_result=term_result+ws.recv()
+        ws.close()
         return term_result
 
-    #print()
-    #print(exec_result.password)
+
 
 
 def launchVqganClipWithPhrase(phrase,initImage=None,model=None,iterations=None,size=None):
