@@ -2,7 +2,7 @@ import random
 import string
 import time
 import sys
-from os import getenv,environ, initgroups
+from os import getenv,environ, initgroups, terminal_size
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import SubscriptionClient
 #from azure.common.client_factory import get_client_from_auth_file
@@ -10,6 +10,8 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.containerinstance import ContainerInstanceManagementClient
 from azure.mgmt.containerinstance.models import (ContainerGroup,
                                                  Container,
+                                                 ContainerExecRequest,
+                                                 ContainerExecRequestTerminalSize,
                                                  ContainerGroupNetworkProtocol,
                                                  ContainerGroupRestartPolicy,
                                                  ContainerPort,
@@ -24,7 +26,7 @@ from azure.mgmt.containerinstance.models import (ContainerGroup,
                                                  ResourceRequirements,
                                                  OperatingSystemTypes)
 from six import string_types
-
+import websocket
 
 def run_task_based_container(aci_client, resource_group, container_group_name,
                              container_image_name, start_command_line=None):
@@ -99,7 +101,43 @@ def run_task_based_container(aci_client, resource_group, container_group_name,
     #     sys.stdout.write('.')
     #     time.sleep(1)
 
+
+def launchVqganClipWithPhraseOnExistingInstance(phrase,initImage=None,model=None,iterations=None,size=None):
+    run_command="python generate_images.py -i "+phrase+" --save_video  --overwrite "
+    if(initImage):
+         run_command = run_command +" --init_image /tf/outputs/"+initImage
+    if(model):
+        run_command = run_command +" -m "+model
+    if(iterations):
+        run_command = run_command +" --iterations " + str(iterations)
+    if(size):
+        run_command = run_command +" --size " + str(size[0])+ " " +str(size[1])
+    resource_group_name ="gangogh" #environ["resgroup"]
+    container_group_name = "vqganclip-demo"
+    container_name="vqganclip-demo"
+    credential = DefaultAzureCredential()
+    aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
+    #run_command=
+    exec_command=ContainerExecRequest(command="/bin/bash",terminal_size=ContainerExecRequestTerminalSize(rows=400,cols=400))
     
+    exec_result=aciclient.containers.execute_command(resource_group_name,container_group_name,container_name,exec_command)
+    ws = websocket.WebSocket()
+    ws.connect(exec_result.web_socket_uri)
+    if(ws.connected):
+        ws.send(exec_result.password)
+        ws.send(run_command+"\n")
+        term_result=ws.recv()
+        # term_result=term_result+ws.recv()
+        # term_result=term_result+ws.recv()
+        # term_result=term_result+ws.recv()
+        # term_result=term_result+ws.recv()
+        # term_result=term_result+ws.recv()
+        # term_result=term_result+ws.recv()
+        # term_result=term_result+ws.recv()
+        return term_result
+
+    #print()
+    #print(exec_result.password)
 
 
 def launchVqganClipWithPhrase(phrase,initImage=None,model=None,iterations=None,size=None):
