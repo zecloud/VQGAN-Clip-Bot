@@ -18,24 +18,24 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     orchRequest:Dict[str,str]  =context.get_input()
     
     containerGroupName="vqganclip-demo"
-    status = yield context.call_activity("VerifyDreamStatus",containerGroupName)
-    job_status=status[0]
-    container_status = status[1]
-    if(str(job_status).lower()=="succeeded" and str(container_status).lower() =="running"):
-        yield context.call_activity("GenerateImageOnExistingNight",orchRequest)
-        
-        expiry_time = context.current_utc_datetime + timedelta(minutes=20)
-        while context.current_utc_datetime < expiry_time:
-            finished=yield context.call_activity("ExportImages",orchRequest)
-            if(finished):
-                yield context.call_activity("CleanImages",orchRequest)
-                #clean
-                break
-            next_check = context.current_utc_datetime + timedelta(minutes=1)
-            context.set_custom_status("DreamInProgress")
-            yield context.create_timer(next_check)
+    # status = yield context.call_activity("VerifyDreamStatus",containerGroupName)
+    # job_status=status[0]
+    # container_status = status[1]
+    # if(str(job_status).lower()=="succeeded" and str(container_status).lower() =="running"):
+    yield context.call_activity("GenerateImageOnExistingNight",orchRequest)
+    
+    expiry_time = context.current_utc_datetime + timedelta(minutes=20)
+    while context.current_utc_datetime < expiry_time:
+        finished=yield context.call_activity("ExportImages",orchRequest)
+        if(finished):
+            yield context.call_activity("CleanImages",orchRequest)
+            #clean
+            break
+        next_check = context.current_utc_datetime + timedelta(minutes=1)
+        context.set_custom_status("DreamInProgress")
+        yield context.create_timer(next_check)
 
-    return job_status
+    return True
     
 
 main = df.Orchestrator.create(orchestrator_function)

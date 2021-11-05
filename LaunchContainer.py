@@ -118,7 +118,7 @@ def launchVqganClipWithPhraseOnExistingInstance(phrase,initImage=None,model=None
     credential = DefaultAzureCredential()
     aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
     exec_command=ContainerExecRequest(command="/bin/bash",terminal_size=ContainerExecRequestTerminalSize(rows=400,cols=400))
-    
+   
     exec_result=aciclient.containers.execute_command(resource_group_name,container_group_name,container_name,exec_command)
     ws = websocket.WebSocket()
     ws.connect(exec_result.web_socket_uri)

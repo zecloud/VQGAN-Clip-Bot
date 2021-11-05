@@ -16,3 +16,4 @@ def main(imagine:  Dict[str,str]) -> str:
     exppath=prefixpath+experiment.to_experiment_name(imagine["phrase"])
     if(exppath!=prefixpath):
         shutil.rmtree(exppath)
+    return True
