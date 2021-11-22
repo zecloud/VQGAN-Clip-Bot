@@ -2,9 +2,16 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "name": "name",
+      "name": "cname",
       "type": "activityTrigger",
       "direction": "in"
+    },
+    {
+      "type": "signalR",
+      "direction": "out",
+      "name": "notifyFrontSignalR",
+      "hubName": "gangogh",
+      "connectionStringSetting": "SignalrCS"
     }
   ]
 }

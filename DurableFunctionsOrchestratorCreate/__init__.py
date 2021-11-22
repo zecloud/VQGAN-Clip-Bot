@@ -18,18 +18,25 @@ def orchestrator_function(context: df.DurableOrchestrationContext):
     orchRequest:Dict[str,str]  =context.get_input()
     
     containerGroupName =yield context.call_activity('Generate_images', orchRequest)
+    if(orchRequest.get("dream_id",False)):
+        tup=(containerGroupName,orchRequest["dream_id"])
+    else:
+        tup =(containerGroupName,)
     trycount=0
     expiry_time = context.current_utc_datetime + timedelta(minutes=120)
     while context.current_utc_datetime < expiry_time:
-        status = yield context.call_activity("VerifyDreamStatus",containerGroupName)
+        status = yield context.call_activity("VerifyDreamStatus",tup)
         job_status=status[0]
         logging.info(str(job_status))
         if str(job_status).lower()  == "succeeded":
+            if(orchRequest.get("dream_id",False)):
+                yield context.call_activity('PreviewImages', orchRequest)
             context.set_custom_status("ContainerStarted")
             container_status = status[1]
             if(str(container_status).lower()=="succeeded"):
                 context.set_custom_status("succeeded")
-                yield context.call_activity('CopyFinishedDream', orchRequest)
+                if(not orchRequest.get("dream_id",False)):
+                    yield context.call_activity('CopyFinishedDream', orchRequest)
                 finallog=yield context.call_activity("Clean",containerGroupName)
                 logging.info(finallog)
                 break

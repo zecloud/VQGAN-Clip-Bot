@@ -7,6 +7,14 @@
       "direction": "in"
     },
     {
+      "type": "blob",
+      "direction": "out",
+      "name": "exportImage",
+      "path": "gangoghdemo/{dream_id}.jpg",
+      "connection": "origin_STORAGE",
+      "dataType": "binary"
+    },
+    {
       "type": "signalR",
       "direction": "out",
       "name": "notifyFrontSignalR",
