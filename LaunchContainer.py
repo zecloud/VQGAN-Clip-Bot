@@ -4,7 +4,7 @@ import string
 import time
 import sys
 from os import getenv,environ, initgroups, terminal_size
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import ResourceExistsError, ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import SubscriptionClient
 #from azure.common.client_factory import get_client_from_auth_file
@@ -171,21 +171,33 @@ def launchVqganClipWithPhrase(phrase,initImage=None,model=None,iterations=None,s
     return container_group_name
 
 def getProvisioningState(container_group_name=None):
-    credential = DefaultAzureCredential()
-    resource_group_name = environ["resgroup"]
-    aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
-    # Get the provisioning state of the container group.
-    container_group = aciclient.container_groups.get(resource_group_name,
-                                                      container_group_name)
-    return container_group.provisioning_state
+    try:
+        credential = DefaultAzureCredential()
+        resource_group_name = environ["resgroup"]
+        aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
+        # Get the provisioning state of the container group.
+        container_group = aciclient.container_groups.get(resource_group_name,
+                                                        container_group_name)
+        return container_group.provisioning_state
+    except  ClientAuthenticationError as exc:
+        logging.info("Can not get provisioning state")
+        logging.info(exc.message)
+        return "Unknown"
+   
 
 def getContainerState(container_group_name=None):
-    credential = DefaultAzureCredential()
-    resource_group_name = environ["resgroup"]
-    aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
-    container_group = aciclient.container_groups.get(resource_group_name,
-                                                      container_group_name)
-    return container_group.instance_view.state
+    try:
+        credential = DefaultAzureCredential()
+        resource_group_name = environ["resgroup"]
+        aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
+        container_group = aciclient.container_groups.get(resource_group_name,
+                                                        container_group_name)
+        return container_group.instance_view.state
+    except  ClientAuthenticationError as exc:
+        logging.info("Can not get container state")
+        logging.info(exc.message)
+        return "Unknown"
+    
 
 
 def removeContainerGroupFinished(container_group_name):
