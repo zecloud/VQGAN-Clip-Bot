@@ -1,8 +1,10 @@
+import logging
 import random
 import string
 import time
 import sys
 from os import getenv,environ, initgroups, terminal_size
+from azure.core.exceptions import ResourceExistsError
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import SubscriptionClient
 #from azure.common.client_factory import get_client_from_auth_file
@@ -29,7 +31,7 @@ from six import string_types
 import websocket
 
 def run_task_based_container(aci_client, resource_group, container_group_name,
-                             container_image_name, start_command_line=None):
+                             container_image_name, start_command_line=None,gpu_sku=environ["SKUGPU"]):
     """Creates a container group with a single task-based container who's
        restart policy is 'Never'. If specified, the container runs a custom
        command line at startup.
@@ -59,7 +61,7 @@ def run_task_based_container(aci_client, resource_group, container_group_name,
     print("Creating container group '{0}' with start command '{1}'"
           .format(container_group_name, start_command_line))
 
-    gpu_res= GpuResource(count=1,sku=environ["SKUGPU"])
+    gpu_res= GpuResource(count=1,sku=gpu_sku)
     # Configure the container
     container_resource_requests = ResourceRequests(memory_in_gb=16, cpu=1.0,gpu=gpu_res)
     container_resource_requirements = ResourceRequirements(
@@ -152,10 +154,20 @@ def launchVqganClipWithPhrase(phrase,initImage=None,model=None,iterations=None,s
     resclient=ResourceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
     aciclient=ContainerInstanceManagementClient(credential=credential,subscription_id=environ["AZURE_SUBSCRIPTION_ID"])
     resource_group = resclient.resource_groups.get(resource_group_name)
-    run_task_based_container(aciclient, resource_group,
+    try:
+        run_task_based_container(aciclient, resource_group,
                             container_group_name,
                             container_image_app,
                             run_command)
+    except ResourceExistsError as exc: 
+        logging.info("Probably Gpu could not be allocated in this region.(next log should verify this) so try another gpu or region")
+        logging.info(exc.message)
+        run_task_based_container(aciclient, resource_group,
+                            container_group_name,
+                            container_image_app,
+                            run_command,
+                            gpu_sku=environ["SKUGPUHIGH"])
+        
     return container_group_name
 
 def getProvisioningState(container_group_name=None):
