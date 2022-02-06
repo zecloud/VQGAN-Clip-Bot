@@ -31,7 +31,7 @@ from six import string_types
 import websocket
 
 def run_task_based_container(aci_client, resource_group, container_group_name,
-                             container_image_name, start_command_line=None,gpu_sku=environ["SKUGPU"]):
+                             container_image_name, start_command_line=None,gpu_sku=environ["SKUGPU"],location=None):
     """Creates a container group with a single task-based container who's
        restart policy is 'Never'. If specified, the container runs a custom
        command line at startup.
@@ -83,7 +83,7 @@ def run_task_based_container(aci_client, resource_group, container_group_name,
     ]
     image_registry=[ImageRegistryCredential(server="zecloud.azurecr.io",username="zecloud",password=environ["REGISTRYPASSWORD"])]
     # Configure the container group
-    group = ContainerGroup(location=resource_group.location,
+    group = ContainerGroup(location=(lambda: resource_group.location if (location is None) else location)(),
                            containers=[container],
                            volumes=share_volumes,
                            image_registry_credentials=image_registry,
@@ -162,11 +162,20 @@ def launchVqganClipWithPhrase(phrase,initImage=None,model=None,iterations=None,s
     except ResourceExistsError as exc: 
         logging.info("Probably Gpu could not be allocated in this region.(next log should verify this) so try another gpu or region")
         logging.info(exc.message)
-        run_task_based_container(aciclient, resource_group,
+        try:
+            run_task_based_container(aciclient, resource_group,
                             container_group_name,
                             container_image_app,
                             run_command,
                             gpu_sku=environ["SKUGPUHIGH"])
+        except ResourceExistsError as exc: 
+            logging.info("Probably Gpu could not be allocated in this region.(next log should verify this) so try another gpu or region")
+            logging.info(exc.message)
+            run_task_based_container(aciclient, resource_group,
+                            container_group_name,
+                            container_image_app,
+                            run_command,
+                            location="eastus")
         
     return container_group_name
 
