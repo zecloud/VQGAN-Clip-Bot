@@ -13,7 +13,7 @@ from typing import Dict
 import azure.functions as func
 import json
 
-def main(imagine:  Dict[str,str],exportImage:func.Out[bytes],notifyFrontSignalR: func.Out[str]) -> str:
+def main(imagine:  Dict[str,str],exportImage:func.Out[bytes],exportVid:func.Out[bytes],notifyFrontSignalR: func.Out[str]) -> str:
 
     prefixpath="/outputs/"
     exppath=experiment.to_experiment_name(imagine["phrase"])
@@ -29,6 +29,8 @@ def main(imagine:  Dict[str,str],exportImage:func.Out[bytes],notifyFrontSignalR:
     if(finished):
         with open(finalpath,'rb') as f:   
             exportImage.set(f.read())
+        with open(videopath,'rb') as f:   
+            exportVid.set(f.read())  
     else:
         if(os.path.exists(progresspath)):
             with open(progresspath,'rb') as f:   

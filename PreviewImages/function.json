@@ -15,6 +15,14 @@
       "dataType": "binary"
     },
     {
+      "type": "blob",
+      "direction": "out",
+      "name": "exportVid",
+      "path": "gangoghviddemo/{dream_id}.jpg",
+      "connection": "origin_STORAGE",
+      "dataType": "binary"
+    },
+    {
       "type": "signalR",
       "direction": "out",
       "name": "notifyFrontSignalR",
